@@ -10,6 +10,7 @@
 		<em:version>0.1.0</em:version>
 		<em:description>Some tweaks for Tree Style Tab extension (just an example)</em:description>
 		<em:creator>Infocatcher</em:creator>
+		<em:developer>YUKI &quot;Piro&quot; Hiroshi</em:developer>
 
 		<em:targetApplication> <!-- Firefox -->
 			<Description>
