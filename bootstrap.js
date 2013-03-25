@@ -81,6 +81,7 @@ var windowsObserver = {
 		if (
 			tab.linkedBrowser.currentURI.spec.startsWith('about:treestyletab-group')
 			|| !TST.hasChildTabs(tab)
+			|| TST.isSubtreeCollapsed(tab)
 		)
 			return;
 
