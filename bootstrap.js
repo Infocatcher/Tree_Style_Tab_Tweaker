@@ -85,7 +85,7 @@ var windowsObserver = {
 		)
 			return;
 
-		var parent = gBrowser.addTab('about:treestyletab-group?' + encodeURIComponent(tab.label));
+		var parent = gBrowser.addTab('about:treestyletab-group?' + encodeURIComponent(tab.label), { skipAnimation: true });
 		gBrowser.moveTabTo(parent, tab._tPos);
 		TST.getChildTabs(tab).forEach(function(child) {
 			TST.attachTabTo(child, parent);
