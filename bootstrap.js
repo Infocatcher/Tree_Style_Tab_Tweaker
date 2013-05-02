@@ -46,7 +46,9 @@ var windowsObserver = {
 	handleEvent: function(e) {
 		switch(e.type) {
 			case "load":     this.loadHandler(e);     break;
-			case "TabClose": this.tabCloseHandler(e);
+			case "TabClose": this.tabCloseHandler(e); break;
+			case "click":    this.clickHandler(e);    break;
+			case "keypress": this.keypressHandler(e);
 		}
 	},
 	loadHandler: function(e) {
@@ -59,30 +61,73 @@ var windowsObserver = {
 		if(reason == WINDOW_LOADED && !this.isTargetWindow(window))
 			return;
 
-		window.addEventListener("TabClose", this, false);
+		window.addEventListener("TabClose", this, true);
+
+		Array.forEach(
+			window.gBrowser.tabs,
+			function(tab) {
+				if(this.ss.getTabValue(tab, this.tabKeyParentId)) {
+					tab.linkedBrowser.addEventListener("click", this, true);
+					tab.linkedBrowser.addEventListener("keypress", this, true);
+				}
+			},
+			this
+		);
 	},
 	destroyWindow: function(window, reason) {
 		window.removeEventListener("load", this, false); // Window can be closed before "load"
 		if(reason == WINDOW_CLOSED && !this.isTargetWindow(window))
 			return;
 
-		window.removeEventListener("TabClose", this, false);
+		window.removeEventListener("TabClose", this, true);
+
+		var forceCleanup = reason == ADDON_DISABLE || ADDON_DISABLE == ADDON_UNINSTALL;
+		Array.forEach(
+			window.gBrowser.tabs,
+			function(tab) {
+				if(forceCleanup)
+					this.ss.deleteTabValue(tab, this.tabKeyId);
+				if(this.ss.getTabValue(tab, this.tabKeyParentId)) {
+					tab.linkedBrowser.removeEventListener("click", this, true);
+					tab.linkedBrowser.removeEventListener("keypress", this, true);
+					if(forceCleanup) {
+						this.ss.deleteTabValue(tab, this.tabKeyParentURI);
+						this.ss.deleteTabValue(tab, this.tabKeyParentURI);
+					}
+				}
+			},
+			this
+		);
 	},
 	isTargetWindow: function(window) {
 		return window.document.documentElement.getAttribute("windowtype") == "navigator:browser";
 	},
 
+	tabKeyId:        "treeStyleTabTweaker-id",
+	tabKeyParentId:  "treeStyleTabTweaker-parentId",
+	tabKeyParentURI: "treeStyleTabTweaker-parentURI",
+	get ss() {
+		delete this.ss;
+		return this.ss = Components.classes["@mozilla.org/browser/sessionstore;1"]
+			.getService(Components.interfaces.nsISessionStore);
+	},
 	tabCloseHandler: function(aEvent) {
+		var tab = aEvent.originalTarget;
+		if(this.ss.getTabValue(tab, this.tabKeyParentId)) {
+			tab.linkedBrowser.removeEventListener("click", this, true);
+			tab.linkedBrowser.removeEventListener("keypress", this, true);
+		}
+
 		if (aEvent.detail) // Tab moved to another window
 			return;
 
-		var tab = aEvent.originalTarget;
 		var window = tab.ownerDocument.defaultView;
 		var gBrowser = window.gBrowser;
 		var TST = gBrowser.treeStyleTab;
 
+		var tabURI = tab.linkedBrowser.currentURI.spec;
 		if (
-			tab.linkedBrowser.currentURI.spec.startsWith('about:treestyletab-group')
+			tabURI.startsWith('about:treestyletab-group')
 			|| !TST.hasChildTabs(tab)
 			|| TST.isSubtreeCollapsed(tab)
 		)
@@ -93,5 +138,64 @@ var windowsObserver = {
 		TST.getChildTabs(tab).forEach(function(child) {
 			TST.attachTabTo(child, parent);
 		});
+
+		var tabId = Date.now() + "-" + Math.random().toFixed(14).substr(2);
+		// We handle "TabClose" from window in capturing phase, so this should happens before "SSTabClosing"
+		this.ss.setTabValue(tab, this.tabKeyId, tabId);
+		this.ss.setTabValue(parent, this.tabKeyParentId, tabId);
+		this.ss.setTabValue(parent, this.tabKeyParentURI, tabURI);
+
+		var browser = parent.linkedBrowser;
+		browser.addEventListener("click", this, true);
+		browser.addEventListener("keypress", this, true);
+	},
+
+	clickHandler: function(e) {
+		if(e.button == 0)
+			this.handleTabCommand(e);
+	},
+	keypressHandler: function(e) {
+		if(e.keyCode == e.DOM_VK_RETURN)
+			this.handleTabCommand(e);
+	},
+	handleTabCommand: function(e) {
+		var trg = e.target;
+		if(
+			trg.className != "icon"
+			|| !trg.ownerDocument.documentURI.startsWith("about:treestyletab-group")
+		)
+			return;
+		var browser = e.currentTarget;
+		var window = browser.ownerDocument.defaultView;
+		var gBrowser = window.gBrowser;
+		var tab = gBrowser._getTabForBrowser(browser);
+		var parentId = this.ss.getTabValue(tab, this.tabKeyParentId);
+		if(!parentId)
+			return;
+
+		try {
+			var closedTabs = JSON.parse(this.ss.getClosedTabData(window));
+			for(var i = 0, l = closedTabs.length; i < l; ++i) {
+				var closedTab = closedTabs[i];
+				var state = closedTab.state;
+				if(
+					"extData" in state
+					&& this.tabKeyId in state.extData
+					&& state.extData[this.tabKeyId] == parentId
+				) {
+					//this.ss.undoCloseTab(window, i);
+					window.undoCloseTab(i);
+					gBrowser.removeTab(tab, { animate: false });
+					return;
+				}
+			}
+		}
+		catch(e) {
+			Components.utils.reportError(e);
+		}
+
+		var parentURI = this.ss.getTabValue(tab, this.tabKeyParentURI);
+		if(parentURI)
+			browser.loadURI(parentURI);
 	}
 };
