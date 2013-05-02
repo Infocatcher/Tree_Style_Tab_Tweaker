@@ -73,6 +73,9 @@ var windowsObserver = {
 	},
 
 	tabCloseHandler: function(aEvent) {
+		if (aEvent.detail) // Tab moved to another window
+			return;
+
 		var tab = aEvent.originalTarget;
 		var window = tab.ownerDocument.defaultView;
 		var gBrowser = window.gBrowser;
