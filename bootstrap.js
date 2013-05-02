@@ -35,6 +35,9 @@ var windowsObserver = {
 		while(ws.hasMoreElements())
 			this.destroyWindow(ws.getNext(), reason);
 		Services.ww.unregisterNotification(this);
+
+		if(reason != APP_SHUTDOWN)
+			this.loadStyles(false);
 	},
 
 	observe: function(subject, topic, data) {
@@ -69,6 +72,7 @@ var windowsObserver = {
 				if(this.ss.getTabValue(tab, this.tabKeyParentId)) {
 					tab.linkedBrowser.addEventListener("click", this, true);
 					tab.linkedBrowser.addEventListener("keypress", this, true);
+					this.loadStyles(true);
 				}
 			},
 			this
@@ -101,6 +105,26 @@ var windowsObserver = {
 	},
 	isTargetWindow: function(window) {
 		return window.document.documentElement.getAttribute("windowtype") == "navigator:browser";
+	},
+
+	get sss() {
+		delete this.sss;
+		return this.sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
+			.getService(Components.interfaces.nsIStyleSheetService);
+	},
+	_stylesLoaded: false,
+	loadStyles: function(load) {
+		if(!load ^ this._stylesLoaded)
+			return;
+		this._stylesLoaded = load;
+		var cssURI = Services.io.newURI("chrome://treestyletabtweaker/content/content.css", null, null);
+		var sss = this.sss;
+		if(!load ^ sss.sheetRegistered(cssURI, sss.USER_SHEET))
+			return;
+		if(load)
+			sss.loadAndRegisterSheet(cssURI, sss.USER_SHEET);
+		else
+			sss.unregisterSheet(cssURI, sss.USER_SHEET);
 	},
 
 	tabKeyId:        "treeStyleTabTweaker-id",
@@ -148,6 +172,7 @@ var windowsObserver = {
 		var browser = parent.linkedBrowser;
 		browser.addEventListener("click", this, true);
 		browser.addEventListener("keypress", this, true);
+		this.loadStyles(true);
 	},
 
 	clickHandler: function(e) {

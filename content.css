@@ -1,0 +1,10 @@
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+@-moz-document url-prefix("about:treestyletab-group") {
+	.label-container .icon {
+		cursor: pointer !important;
+		-moz-user-focus: normal !important;
+	}
+	.label-container .icon:focus {
+		outline: 1px dotted !important;
+	}
+}
