@@ -8,17 +8,26 @@
 		<em:bootstrap>true</em:bootstrap>
 		<em:name>Tree Style Tab Tweaker</em:name>
 		<em:version>0.1.0</em:version>
-		<em:description>Some tweaks for Tree Style Tab extension (just an example)</em:description>
+		<em:description>Some tweaks for Tree Style Tab extension</em:description>
 		<em:creator>Infocatcher</em:creator>
-		<em:developer>YUKI &quot;Piro&quot; Hiroshi</em:developer>
+		<em:developer>YUKI "Piro" Hiroshi</em:developer>
 
 		<em:targetApplication> <!-- Firefox -->
 			<Description>
 				<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
 				<em:minVersion>17.0</em:minVersion>
-				<em:maxVersion>22.0a1</em:maxVersion>
+				<em:maxVersion>23.0a1</em:maxVersion>
 			</Description>
 		</em:targetApplication>
+
+		<em:localized>
+			<Description>
+				<em:locale>ru</em:locale>
+				<em:name>Tree Style Tab Tweaker</em:name>
+				<em:description>Некоторые улучшения для расширения Tree Style Tab</em:description>
+				<em:creator>Infocatcher</em:creator>
+			</Description>
+		</em:localized>
 
 	</Description>
 </RDF>
