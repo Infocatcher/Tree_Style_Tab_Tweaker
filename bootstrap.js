@@ -85,7 +85,7 @@ var windowsObserver = {
 
 		window.removeEventListener("TabClose", this, true);
 
-		var forceCleanup = reason == ADDON_DISABLE || ADDON_DISABLE == ADDON_UNINSTALL;
+		var forceCleanup = reason == ADDON_DISABLE || reason == ADDON_UNINSTALL;
 		Array.forEach(
 			window.gBrowser.tabs,
 			function(tab) {
