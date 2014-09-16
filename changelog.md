@@ -6,6 +6,7 @@
 `*` - improved<br>
 
 ##### master/HEAD
+##### 0.1.1pre2 (2014-09-16)
 `*` Force select restored tab after click on folder icon.<br>
 
 ##### 0.1.1pre (2013-05-02)
