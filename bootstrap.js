@@ -209,8 +209,12 @@ var windowsObserver = {
 					&& state.extData[this.tabKeyId] == parentId
 				) {
 					//this.ss.undoCloseTab(window, i);
-					window.undoCloseTab(i);
+					var newTab = window.undoCloseTab(i);
 					gBrowser.removeTab(tab, { animate: false });
+					window.setTimeout(function() {
+						if(!newTab.selected)
+							gBrowser.selectedTab = newTab;
+					}, 0);
 					return;
 				}
 			}
