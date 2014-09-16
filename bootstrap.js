@@ -8,13 +8,13 @@ function install(params, reason) {
 function uninstall(params, reason) {
 }
 function startup(params, reason) {
-	windowsObserver.init(reason);
+	tstTweaker.init(reason);
 }
 function shutdown(params, reason) {
-	windowsObserver.destroy(reason);
+	tstTweaker.destroy(reason);
 }
 
-var windowsObserver = {
+var tstTweaker = {
 	initialized: false,
 	init: function(reason) {
 		if(this.initialized)
