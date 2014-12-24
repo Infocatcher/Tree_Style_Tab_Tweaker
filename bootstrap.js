@@ -193,7 +193,9 @@ var tstTweaker = {
 		var browser = e.currentTarget;
 		var window = browser.ownerDocument.defaultView;
 		var gBrowser = window.gBrowser;
-		var tab = gBrowser._getTabForBrowser(browser);
+		var tab = "getTabForBrowser" in gBrowser // Firefox 35+
+			? gBrowser.getTabForBrowser(browser)
+			: gBrowser._getTabForBrowser(browser);
 		var parentId = this.ss.getTabValue(tab, this.tabKeyParentId);
 		if(!parentId)
 			return;
