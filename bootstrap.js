@@ -142,7 +142,11 @@ var tstTweaker = {
 			tab.linkedBrowser.removeEventListener("keypress", this, true);
 		}
 
-		if (aEvent.detail) // Tab moved to another window
+		if(
+			typeof aEvent.detail == "object" // Firefox 47+
+				? aEvent.detail && aEvent.detail.adoptedBy
+				: aEvent.detail
+		) // Tab moved to another window
 			return;
 
 		var window = tab.ownerDocument.defaultView;
