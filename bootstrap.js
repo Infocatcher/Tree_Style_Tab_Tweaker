@@ -66,7 +66,7 @@ var tstTweaker = {
 
 		window.addEventListener("TabClose", this, true);
 
-		Array.forEach(
+		Array.prototype.forEach.call(
 			window.gBrowser.tabs,
 			function(tab) {
 				if(this.ss.getTabValue(tab, this.tabKeyParentId)) {
@@ -86,7 +86,7 @@ var tstTweaker = {
 		window.removeEventListener("TabClose", this, true);
 
 		var forceCleanup = reason == ADDON_DISABLE || reason == ADDON_UNINSTALL;
-		Array.forEach(
+		Array.prototype.forEach.call(
 			window.gBrowser.tabs,
 			function(tab) {
 				if(forceCleanup)
